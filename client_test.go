@@ -9,7 +9,7 @@ import (
 )
 
 var Config idcloudhost.Config = idcloudhost.Config{
-	ApiKey: "j1FzWv3naMJuro3zscxFocCMZI6lYy58",
+	ApiKey: "SopOdexwpt62GRvHJp9R4NzCKBYf0cW2",
 }
 
 func TestGetUserInfo(t *testing.T) {
@@ -120,7 +120,7 @@ func TestStopVM(t *testing.T) {
 
 }
 
-func TestGetBillingAccount(t *testing.T) {
+func TestGetBillingAccountList(t *testing.T) {
 	idc, _ := idcloudhost.New(&Config)
 
 	acc, err := idc.ListBillingAccounts()
@@ -136,9 +136,13 @@ func TestGetBuckets(t *testing.T) {
 }
 
 func TestGetParam(t *testing.T) {
-	c, _ := idcloudhost.New(&idcloudhost.Config{
-		ApiKey: "2gObUFKCZ67AetXLvIGg0zZK6rHNsW24",
-	})
+	c, _ := idcloudhost.New(&Config)
 
 	fmt.Println(c.GetVMParameter())
+}
+
+func TestGetBillingDetails(t *testing.T) {
+	// idc, err := idcloudhost.New(&Config)
+
+	// idc.
 }

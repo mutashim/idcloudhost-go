@@ -574,3 +574,103 @@ func (c *Client) ListBillingAccounts() (*[]BillingAccount, error) {
 
 	return &accs, nil
 }
+
+// Get billing account's detailed data.
+//
+// https://api.idcloudhost.com/#billing-account-details
+func (c *Client) GetBillingAccountDetail(billingAccountID int) (*BillingAccount, error) {
+	res, err := c.request("GET", fmt.Sprintf("v1/payment/billing_account?billing_account_id=%v", billingAccountID), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	bil := new(BillingAccount)
+	if err := json.Unmarshal(res, bil); err != nil {
+		return nil, err
+	}
+
+	return bil, nil
+}
+
+// Get billing account's unpaid total amount (with VAT included). This is unpaid
+// amount of all invoices who's status is not 'paid'
+//
+// https://api.idcloudhost.com/#get-unpaid-amount
+func (c *Client) GetUnpaidAmount(billingAccountID int) (float64, error) {
+	res, err := c.request("GET", fmt.Sprintf("v1/payment/billing_account/unpaid_amount?billing_account_id=%v", billingAccountID), nil)
+	if err != nil {
+		return 0, err
+	}
+
+	var response struct {
+		Message float64 `json:"message"`
+	}
+	if err := json.Unmarshal(res, &response); err != nil {
+		return 0, err
+	}
+
+	return response.Message, nil
+}
+
+// Buy credit for a billing account, using specified credit card.
+//
+// https://api.idcloudhost.com/#buy-credit
+func (c *Client) BuyCredit(billingAccountID int, paymentObjectID int, amount float64) error {
+
+	data := url.Values{}
+	data.Add("billing_account_id", fmt.Sprint(billingAccountID))
+	data.Add("payment_object_id", fmt.Sprint(paymentObjectID))
+	data.Add("amount", fmt.Sprint(amount))
+
+	res, err := c.request("POST", "v1/payment/credit/buy", &data)
+	if err != nil {
+		return err
+	}
+
+	var response struct {
+		Success bool `json:"success"`
+	}
+	if err := json.Unmarshal(res, &response); err != nil {
+		return err
+	}
+
+	if !response.Success {
+		return fmt.Errorf("response error")
+	}
+	return nil
+}
+
+// Request invoice for credit top up using manual bank transfer.
+// Invoice will be generated with specified amount and sent to
+// billing account's e-mail address.
+//
+// https://api.idcloudhost.com/#request-invoice-for-credit-top-up
+func (c *Client) RequestInvoiceForCreditTopup(billingAccountID int, amount float64) error {
+
+	data := url.Values{}
+	data.Add("billing_account_id", fmt.Sprint(billingAccountID))
+	data.Add("amount", fmt.Sprint(amount))
+
+	res, err := c.request("POST", "v1/payment/credit/request_invoice", &data)
+	if err != nil {
+		return err
+	}
+
+	var response struct {
+		Success bool `json:"success"`
+	}
+	if err := json.Unmarshal(res, &response); err != nil {
+		return err
+	}
+
+	if !response.Success {
+		return fmt.Errorf("response error")
+	}
+	return nil
+}
+
+func (c *Client) GetListInvoices(billingAccountID int) ([]Invoice, error) {
+	return nil, nil
+}
+
+// func (c *Client) GetResourceUsage(billingAccountID int)
